@@ -2,9 +2,13 @@ package android.rahardyan.simplechatapp.ui.chat.presenter;
 
 import android.net.Uri;
 import android.rahardyan.simplechatapp.model.Comment;
+import android.rahardyan.simplechatapp.model.CommentDetail;
 import android.rahardyan.simplechatapp.model.CommentRequestBody;
 
 import java.io.File;
+import java.util.List;
+
+import io.realm.RealmList;
 
 /**
  * Created by rahardyan on 03/06/17.
@@ -16,19 +20,19 @@ public interface ChatContract {
 
         void onDismissLoading();
 
-        void onSuccessLoadComment(Comment comment);
+        void onSuccessLoadComment(RealmList<CommentDetail> comment);
 
         void onFailedLoadComment(String message);
 
         void onReceivedComment();
 
-        void onSendComment(Comment.CommentDetail commentDetail);
+        void onSendComment(CommentDetail commentDetail);
 
-        void onSuccessSendComment(Comment.CommentDetail commentDetail);
+        void onSuccessSendComment(CommentDetail commentDetail);
 
-        void onFailedSendComment(Comment.CommentDetail commentDetail);
+        void onFailedSendComment(CommentDetail commentDetail);
 
-        void onLoadMoreComment(Comment comment);
+        void onLoadMoreComment(RealmList<CommentDetail> comment);
 
         void onFailedUploadFile();
 
@@ -50,7 +54,9 @@ public interface ChatContract {
 
         void uploadFile(String issueId, File file, Uri fileUri);
 
-        void loadComment(String issueId);
+        void loadCommentFromServer(String issueId);
+
+        void loadCommentFromDb(String issueId);
 
         void loadMoreComment(String issueId, int page);
 

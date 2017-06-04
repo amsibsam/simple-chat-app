@@ -8,11 +8,13 @@ import android.rahardyan.simplechatapp.base.BaseActivity;
 import android.rahardyan.simplechatapp.model.Comment;
 import android.os.Bundle;
 import android.rahardyan.simplechatapp.R;
+import android.rahardyan.simplechatapp.model.CommentDetail;
 import android.rahardyan.simplechatapp.model.CommentRequestBody;
 import android.rahardyan.simplechatapp.model.WebSocketMessage;
 import android.rahardyan.simplechatapp.ui.chat.adapter.ChatAdapter;
 import android.rahardyan.simplechatapp.ui.chat.presenter.ChatContract;
 import android.rahardyan.simplechatapp.ui.chat.presenter.ChatPresenter;
+import android.rahardyan.simplechatapp.util.ConnectivityUtils;
 import android.rahardyan.simplechatapp.util.Constants;
 import android.rahardyan.simplechatapp.util.EndlessRecyclerViewScrollListener;
 import android.rahardyan.simplechatapp.util.FileUtil;
@@ -31,7 +33,12 @@ import org.greenrobot.eventbus.Subscribe;
 
 import java.io.File;
 import java.io.IOException;
+import java.util.List;
 import java.util.UUID;
+
+import io.realm.Realm;
+import io.realm.RealmList;
+import io.realm.RealmResults;
 
 import static android.content.Intent.FLAG_GRANT_READ_URI_PERMISSION;
 import static android.content.Intent.FLAG_GRANT_WRITE_URI_PERMISSION;
@@ -65,11 +72,16 @@ public class ChatActivity extends BaseActivity implements ChatContract.View{
         EventBus.getDefault().register(this);
         getIntentData();
         chatPresenter = new ChatPresenter(this, this);
-        chatPresenter.loadComment(issueId);
         requestPermission(permissions);
         initView();
         initRecyclerView();
         setUpToolbar(true, topicName);
+
+        if (ConnectivityUtils.isConnectedToNetwork(this)) {
+            chatPresenter.loadCommentFromServer(issueId);
+        } else {
+            chatPresenter.loadCommentFromDb(issueId);
+        }
     }
 
     private void getIntentData() {
@@ -195,8 +207,14 @@ public class ChatActivity extends BaseActivity implements ChatContract.View{
     }
 
     @Override
-    public void onSuccessLoadComment(Comment comment) {
-        chatAdapter.setData(comment.getData());
+    public void onSuccessLoadComment(RealmList<CommentDetail> commentDetails) {
+        RealmResults<CommentDetail> commentDetails2 = Realm.getDefaultInstance().where(CommentDetail.class).findAll();
+        RealmList<CommentDetail> commentDetailRealmList = new RealmList<>();
+        commentDetailRealmList.addAll(commentDetails2);
+        for (CommentDetail commentDetail : commentDetails2) {
+            Log.d(TAG, "onSuccessLoadComment: comment message "+commentDetail.getMessage());
+        }
+        chatAdapter.setData(commentDetails);
     }
 
     @Override
@@ -210,31 +228,31 @@ public class ChatActivity extends BaseActivity implements ChatContract.View{
     }
 
     @Override
-    public void onSendComment(Comment.CommentDetail commentDetail) {
+    public void onSendComment(CommentDetail commentDetail) {
         chatAdapter.addComment(commentDetail);
         recyclerViewComment.smoothScrollToPosition(0);
     }
 
     @Override
-    public void onSuccessSendComment(Comment.CommentDetail commentDetail) {
-        chatPresenter.loadComment(issueId);
+    public void onSuccessSendComment(CommentDetail commentDetail) {
+        chatPresenter.loadCommentFromServer(issueId);
         chatAdapter.removeTempComment(commentDetail);
     }
 
     @Override
-    public void onFailedSendComment(Comment.CommentDetail commentDetail) {
+    public void onFailedSendComment(CommentDetail commentDetail) {
 
     }
 
     @Override
-    public void onLoadMoreComment(Comment comment) {
+    public void onLoadMoreComment(RealmList<CommentDetail> commentDetails) {
         moreCommentLoading.setVisibility(View.GONE);
-        chatAdapter.loadMoreComment(comment.getData());
+        chatAdapter.loadMoreComment(commentDetails);
     }
 
     @Override
     public void onSuccessUploadFile() {
-        chatPresenter.loadComment(issueId);
+        chatPresenter.loadCommentFromServer(issueId);
     }
 
     @Override
@@ -269,7 +287,7 @@ public class ChatActivity extends BaseActivity implements ChatContract.View{
 
     @Subscribe
     public void onWebSocketMessage(WebSocketMessage webSocketMessage) {
-        chatPresenter.loadComment(issueId);
+        chatPresenter.loadCommentFromServer(issueId);
     }
 
 }

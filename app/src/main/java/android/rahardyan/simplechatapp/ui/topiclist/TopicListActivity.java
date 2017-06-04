@@ -3,6 +3,7 @@ package android.rahardyan.simplechatapp.ui.topiclist;
 import android.content.Intent;
 import android.rahardyan.simplechatapp.R;
 import android.rahardyan.simplechatapp.base.BaseActivity;
+import android.rahardyan.simplechatapp.model.IssueList;
 import android.rahardyan.simplechatapp.model.TopicList;
 import android.rahardyan.simplechatapp.network.WebSocketService;
 import android.rahardyan.simplechatapp.ui.chat.ChatActivity;
@@ -10,10 +11,14 @@ import android.rahardyan.simplechatapp.ui.topiclist.adapter.TopicAdapter;
 import android.rahardyan.simplechatapp.ui.topiclist.presenter.TopicContract;
 import android.rahardyan.simplechatapp.ui.topiclist.presenter.TopicPresenter;
 import android.os.Bundle;
+import android.rahardyan.simplechatapp.util.ConnectivityUtils;
 import android.rahardyan.simplechatapp.util.Constants;
 import android.rahardyan.simplechatapp.util.EndlessRecyclerViewScrollListener;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
+
+import io.realm.Realm;
+import io.realm.RealmList;
 
 
 public class TopicListActivity extends BaseActivity implements TopicContract.View {
@@ -31,7 +36,11 @@ public class TopicListActivity extends BaseActivity implements TopicContract.Vie
         initView();
         initRecyclerView();
 
-        topicPresenter.loadTopic();
+        if (ConnectivityUtils.isConnectedToNetwork(this)) {
+            topicPresenter.loadTopic();
+        } else {
+            topicPresenter.loadTopicFromDb();
+        }
     }
 
     private void initRecyclerView() {
@@ -65,13 +74,13 @@ public class TopicListActivity extends BaseActivity implements TopicContract.Vie
     }
 
     @Override
-    public void onSuccessLoadTopic(TopicList topicList) {
-        topicAdapter.setData(topicList.getIssueList());
+    public void onSuccessLoadTopic(RealmList<IssueList> topicList) {
+        topicAdapter.setData(topicList);
     }
 
     @Override
-    public void onLoadMoreTopic(TopicList topicList) {
-        topicAdapter.addData(topicList.getIssueList());
+    public void onLoadMoreTopic(RealmList<IssueList> topicList) {
+        topicAdapter.addData(topicList);
     }
 
     @Override

@@ -2,7 +2,7 @@ package android.rahardyan.simplechatapp.ui.chat.adapter;
 
 import android.content.Context;
 import android.rahardyan.simplechatapp.R;
-import android.rahardyan.simplechatapp.model.Comment;
+import android.rahardyan.simplechatapp.model.CommentDetail;
 import android.rahardyan.simplechatapp.util.DateUtil;
 import android.rahardyan.simplechatapp.util.RoundedImageView;
 import android.support.v7.widget.RecyclerView;
@@ -13,9 +13,9 @@ import android.widget.ImageView;
 import android.widget.TextView;
 
 import com.squareup.picasso.Picasso;
-
-import java.util.ArrayList;
 import java.util.List;
+
+import io.realm.RealmList;
 
 
 /**
@@ -25,7 +25,7 @@ import java.util.List;
 public class ChatAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder>{
     private Context context;
     private OnAttachmentDownloadClickListener onAttachmentDownloadClickListener;
-    private List<Comment.CommentDetail> comments = new ArrayList<>();
+    private RealmList<CommentDetail> comments = new RealmList<>();
     private static final int MY_COMMENT = 0;
     private static final int ANOTHER_COMMENT = 1;
 
@@ -37,18 +37,18 @@ public class ChatAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder>{
         this.onAttachmentDownloadClickListener = onDownloadClickListener;
     }
 
-    public void setData(List<Comment.CommentDetail> comments) {
+    public void setData(RealmList<CommentDetail> comments) {
         this.comments = comments;
         notifyDataSetChanged();
     }
 
-    public void addComment(Comment.CommentDetail commentDetail) {
+    public void addComment(CommentDetail commentDetail) {
         comments.add(0, commentDetail);
         notifyItemInserted(0);
         notifyItemRangeChanged(0, comments.size());
     }
 
-    public void loadMoreComment(List<Comment.CommentDetail> comments) {
+    public void loadMoreComment(List<CommentDetail> comments) {
         if (!comments.isEmpty()) {
             int startIndex = this.comments.size();
             this.comments.addAll(startIndex, comments);
@@ -56,7 +56,7 @@ public class ChatAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder>{
         }
     }
 
-    public void removeTempComment(Comment.CommentDetail commentDetail) {
+    public void removeTempComment(CommentDetail commentDetail) {
         comments.remove(commentDetail);
         notifyItemRemoved(comments.size()-1);
         notifyItemRangeChanged(comments.size()-1, comments.size());

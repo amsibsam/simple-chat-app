@@ -3,9 +3,14 @@ package android.rahardyan.simplechatapp.ui.topiclist.presenter;
 import android.content.Context;
 import android.rahardyan.simplechatapp.R;
 import android.rahardyan.simplechatapp.base.BasePresenter;
+import android.rahardyan.simplechatapp.model.CommentDetail;
+import android.rahardyan.simplechatapp.model.IssueList;
 import android.rahardyan.simplechatapp.model.TopicList;
 import android.support.annotation.NonNull;
 
+import io.realm.Realm;
+import io.realm.RealmList;
+import io.realm.RealmResults;
 import retrofit2.Call;
 import retrofit2.Callback;
 import retrofit2.Response;
@@ -31,7 +36,14 @@ public class TopicPresenter extends BasePresenter implements TopicContract.UserA
             public void onResponse(Call<TopicList> call, Response<TopicList> response) {
                 mTopicView.onDismissLoading();
                 if (response.isSuccessful()) {
-                    mTopicView.onSuccessLoadTopic(response.body());
+                    for (IssueList commentDetail : response.body().getIssueList()) {
+                        Realm realm = Realm.getDefaultInstance();
+                        realm.beginTransaction();
+                        realm.copyToRealmOrUpdate(commentDetail);
+                        realm.commitTransaction();
+                    }
+
+                    mTopicView.onSuccessLoadTopic(response.body().getIssueList());
                 } else {
                     mTopicView.onFailedLoadTopic(context.getResources().getString(R.string.failed_loading_data));
                 }
@@ -51,7 +63,13 @@ public class TopicPresenter extends BasePresenter implements TopicContract.UserA
             @Override
             public void onResponse(Call<TopicList> call, Response<TopicList> response) {
                 if (response.isSuccessful()) {
-                    mTopicView.onSuccessLoadTopic(response.body());
+                    for (IssueList commentDetail : response.body().getIssueList()) {
+                        Realm realm = Realm.getDefaultInstance();
+                        realm.beginTransaction();
+                        realm.copyToRealmOrUpdate(commentDetail);
+                        realm.commitTransaction();
+                    }
+                    mTopicView.onSuccessLoadTopic(response.body().getIssueList());
                 } else {
                     mTopicView.onFailedLoadTopic(context.getResources().getString(R.string.failed_loading_data));
                 }
@@ -62,5 +80,13 @@ public class TopicPresenter extends BasePresenter implements TopicContract.UserA
                 mTopicView.onFailedLoadTopic(context.getResources().getString(R.string.failed_loading_data) + " " + t.toString());
             }
         });
+    }
+
+    @Override
+    public void loadTopicFromDb() {
+        RealmResults<IssueList> issueLists = Realm.getDefaultInstance().where(IssueList.class).findAll();
+        RealmList<IssueList> issueListRealmList = new RealmList<>();
+        issueListRealmList.addAll(issueLists);
+        mTopicView.onSuccessLoadTopic(issueListRealmList);
     }
 }

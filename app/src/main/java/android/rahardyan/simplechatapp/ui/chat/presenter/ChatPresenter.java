@@ -5,6 +5,7 @@ import android.net.Uri;
 import android.rahardyan.simplechatapp.R;
 import android.rahardyan.simplechatapp.base.BasePresenter;
 import android.rahardyan.simplechatapp.model.Comment;
+import android.rahardyan.simplechatapp.model.CommentDetail;
 import android.rahardyan.simplechatapp.model.CommentRequestBody;
 import android.rahardyan.simplechatapp.util.FileUtil;
 import android.support.annotation.NonNull;
@@ -14,6 +15,9 @@ import com.google.gson.JsonElement;
 import java.io.File;
 import java.io.IOException;
 
+import io.realm.Realm;
+import io.realm.RealmList;
+import io.realm.RealmResults;
 import okhttp3.ResponseBody;
 import retrofit2.Call;
 import retrofit2.Callback;
@@ -36,7 +40,7 @@ public class ChatPresenter extends BasePresenter implements ChatContract.UserAct
 
     @Override
     public void sendComment(String issueId, CommentRequestBody commentRequestBody) {
-        final Comment.CommentDetail tempComment = new Comment.CommentDetail();
+        final CommentDetail tempComment = new CommentDetail();
         tempComment.setMessage(commentRequestBody.getComment());
         tempComment.setWrittenTime("0");
         tempComment.setCreatedName("Joy");
@@ -83,7 +87,7 @@ public class ChatPresenter extends BasePresenter implements ChatContract.UserAct
     }
 
     @Override
-    public void loadComment(String issueId) {
+    public void loadCommentFromServer(String issueId) {
         loadingCount++;
         if (loadingCount < 2) {
             mChatView.onShowLoading();
@@ -93,7 +97,13 @@ public class ChatPresenter extends BasePresenter implements ChatContract.UserAct
             public void onResponse(Call<Comment> call, Response<Comment> response) {
                 mChatView.onDismissLoading();
                 if (response.isSuccessful()) {
-                    mChatView.onSuccessLoadComment(response.body());
+                    for (CommentDetail commentDetail : response.body().getData()) {
+                        Realm realm = Realm.getDefaultInstance();
+                        realm.beginTransaction();
+                        realm.copyToRealmOrUpdate(commentDetail);
+                        realm.commitTransaction();
+                    }
+                    mChatView.onSuccessLoadComment(response.body().getData());
                 } else {
                     mChatView.onFailedLoadComment(context.getString(R.string.failed_loading_data));
                 }
@@ -108,6 +118,14 @@ public class ChatPresenter extends BasePresenter implements ChatContract.UserAct
     }
 
     @Override
+    public void loadCommentFromDb(String issueId) {
+        RealmResults<CommentDetail> commentDetails = Realm.getDefaultInstance().where(CommentDetail.class).equalTo("mIssueId", issueId).findAll();
+        RealmList<CommentDetail> commentDetailRealmList = new RealmList<>();
+        commentDetailRealmList.addAll(commentDetails);
+        mChatView.onSuccessLoadComment(commentDetailRealmList);
+    }
+
+    @Override
     public void loadMoreComment(String issueId, int page) {
         mChatView.loadingMoreComment();
         networkManager.getComments(issueId, page).enqueue(new Callback<Comment>() {
@@ -115,7 +133,15 @@ public class ChatPresenter extends BasePresenter implements ChatContract.UserAct
             public void onResponse(Call<Comment> call, Response<Comment> response) {
                 mChatView.onDismissLoading();
                 if (response.isSuccessful()) {
-                    mChatView.onLoadMoreComment(response.body());
+                    for (CommentDetail commentDetail : response.body().getData()) {
+                        Realm realm = Realm.getDefaultInstance();
+                        realm.beginTransaction();
+                        realm.copyToRealmOrUpdate(commentDetail);
+                        realm.commitTransaction();
+                    }
+                    RealmList<CommentDetail> commentDetailRealmList = new RealmList<CommentDetail>();
+                    commentDetailRealmList.addAll(response.body().getData());
+                    mChatView.onLoadMoreComment(commentDetailRealmList);
                 } else {
                     mChatView.onFailedLoadComment(context.getString(R.string.failed_loading_data));
                 }

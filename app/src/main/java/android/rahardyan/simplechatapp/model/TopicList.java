@@ -4,11 +4,13 @@ package android.rahardyan.simplechatapp.model;
 import java.util.List;
 import com.google.gson.annotations.SerializedName;
 
+import io.realm.RealmList;
+
 @SuppressWarnings("unused")
 public class TopicList {
 
     @SerializedName("issue_list")
-    private List<IssueList> mIssueList;
+    private RealmList<IssueList> mIssueList;
     @SerializedName("page")
     private Long mPage;
     @SerializedName("pageSize")
@@ -18,11 +20,11 @@ public class TopicList {
     @SerializedName("userid")
     private String mUserid;
 
-    public List<IssueList> getIssueList() {
+    public RealmList<IssueList> getIssueList() {
         return mIssueList;
     }
 
-    public void setIssueList(List<IssueList> issueList) {
+    public void setIssueList(RealmList<IssueList> issueList) {
         mIssueList = issueList;
     }
 
@@ -58,50 +60,7 @@ public class TopicList {
         mUserid = userid;
     }
 
-    public class IssueList {
 
-        @SerializedName("id")
-        private String mId;
-        @SerializedName("inprogress")
-        private Long mInprogress;
-        @SerializedName("priority")
-        private String mPriority;
-        @SerializedName("title")
-        private String mTitle;
-
-        public String getId() {
-            return mId;
-        }
-
-        public void setId(String id) {
-            mId = id;
-        }
-
-        public Long getInprogress() {
-            return mInprogress;
-        }
-
-        public void setInprogress(Long inprogress) {
-            mInprogress = inprogress;
-        }
-
-        public String getPriority() {
-            return mPriority;
-        }
-
-        public void setPriority(String priority) {
-            mPriority = priority;
-        }
-
-        public String getTitle() {
-            return mTitle;
-        }
-
-        public void setTitle(String title) {
-            mTitle = title;
-        }
-
-    }
 
     public class Topic {
 

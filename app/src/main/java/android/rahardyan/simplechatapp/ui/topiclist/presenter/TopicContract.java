@@ -1,6 +1,9 @@
 package android.rahardyan.simplechatapp.ui.topiclist.presenter;
 
+import android.rahardyan.simplechatapp.model.IssueList;
 import android.rahardyan.simplechatapp.model.TopicList;
+
+import io.realm.RealmList;
 
 /**
  * Created by rahardyan on 03/06/17.
@@ -8,9 +11,9 @@ import android.rahardyan.simplechatapp.model.TopicList;
 
 public interface TopicContract {
     interface View {
-        void onSuccessLoadTopic(TopicList topicList);
+        void onSuccessLoadTopic(RealmList<IssueList> topicList);
 
-        void onLoadMoreTopic(TopicList topicList);
+        void onLoadMoreTopic(RealmList<IssueList> topicList);
 
         void onFailedLoadTopic(String message);
 
@@ -23,5 +26,7 @@ public interface TopicContract {
         void loadTopic();
 
         void loadMoreTopic(int page);
+
+        void loadTopicFromDb();
     }
 }

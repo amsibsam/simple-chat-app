@@ -1,6 +1,7 @@
 package android.rahardyan.simplechatapp.ui.topiclist.adapter;
 
 import android.rahardyan.simplechatapp.R;
+import android.rahardyan.simplechatapp.model.IssueList;
 import android.rahardyan.simplechatapp.model.TopicList;
 import android.rahardyan.simplechatapp.ui.topiclist.presenter.TopicContract;
 import android.support.v7.widget.CardView;
@@ -13,15 +14,17 @@ import android.widget.TextView;
 import java.util.ArrayList;
 import java.util.List;
 
+import io.realm.RealmList;
+
 /**
  * Created by rahardyan on 03/06/17.
  */
 
 public class TopicAdapter extends RecyclerView.Adapter<TopicAdapter.TopicViewHolder>{
-    private List<TopicList.IssueList> issueListList = new ArrayList<>();
+    private RealmList<IssueList> issueListList = new RealmList<>();
     private OnItemClickListener mOnItemClickListener;
 
-    public void setData(List<TopicList.IssueList> issueLists) {
+    public void setData(RealmList<IssueList> issueLists) {
         this.issueListList = issueLists;
         notifyDataSetChanged();
     }
@@ -30,7 +33,7 @@ public class TopicAdapter extends RecyclerView.Adapter<TopicAdapter.TopicViewHol
         this.mOnItemClickListener = onItemClickListener;
     }
 
-    public void addData(List<TopicList.IssueList> moreIssueLists) {
+    public void addData(RealmList<IssueList> moreIssueLists) {
         if (moreIssueLists.size() != 0) {
             int startIndex = this.issueListList.size();
             this.issueListList.addAll(startIndex, moreIssueLists);
