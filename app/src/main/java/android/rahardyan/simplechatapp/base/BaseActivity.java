@@ -88,10 +88,13 @@ public abstract class BaseActivity extends AppCompatActivity {
 
     private void setUpProgressDialog() {
         progressDialog = new ProgressDialog(this);
-        progressDialog.setTitle(R.string.loading);
         progressDialog.setMessage(getString(R.string.loading));
         progressDialog.setCancelable(false);
         progressDialog.setIndeterminate(true);
+    }
+
+    public void setProgressDialogTitle(String title) {
+        progressDialog.setTitle(title);
     }
 
     private void setUpAlertDialog() {
