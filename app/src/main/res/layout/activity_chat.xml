@@ -48,7 +48,8 @@
                 android:id="@+id/btn_attach"
                 android:layout_width="30dp"
                 android:layout_height="30dp"
-                android:background="@drawable/ic_attach_file_black_24dp" />
+                android:background="?attr/selectableItemBackground"
+                android:src="@drawable/ic_attach_file_black_24dp" />
 
             <EditText
                 android:id="@+id/et_comment"

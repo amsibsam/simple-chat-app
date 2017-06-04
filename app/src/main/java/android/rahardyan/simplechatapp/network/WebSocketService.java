@@ -1,40 +1,35 @@
 package android.rahardyan.simplechatapp.network;
 
+import android.app.Notification;
+import android.app.PendingIntent;
 import android.app.Service;
 import android.content.Intent;
-import android.os.AsyncTask;
+import android.graphics.BitmapFactory;
 import android.os.IBinder;
 import android.rahardyan.simplechatapp.BuildConfig;
+import android.rahardyan.simplechatapp.R;
+import android.rahardyan.simplechatapp.model.WebSocketMessage;
+import android.rahardyan.simplechatapp.ui.chat.ChatActivity;
+import android.rahardyan.simplechatapp.ui.topiclist.TopicListActivity;
+import android.support.v4.app.NotificationCompat;
+import android.support.v4.app.NotificationManagerCompat;
+import android.support.v4.app.TaskStackBuilder;
 import android.util.Log;
 
 
-import com.neovisionaries.ws.client.WebSocketAdapter;
-import com.neovisionaries.ws.client.WebSocketFactory;
-import com.neovisionaries.ws.client.WebSocketFrame;
+import com.google.gson.Gson;
 
 import org.apache.http.message.BasicNameValuePair;
-import org.java_websocket.client.WebSocketClient;
-import org.java_websocket.drafts.Draft_10;
-import org.java_websocket.drafts.Draft_17;
-import org.java_websocket.drafts.Draft_6455;
-import org.java_websocket.drafts.Draft_75;
-import org.java_websocket.drafts.Draft_76;
-import org.java_websocket.handshake.ServerHandshake;
+import org.greenrobot.eventbus.EventBus;
 
-import java.io.IOException;
 import java.net.URI;
-import java.net.URISyntaxException;
-
 import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
 
 
 public class WebSocketService extends Service {
     private static final String TAG = WebSocketService.class.getSimpleName();
-//    private final WebSocketConnection mConnection = new WebSocketConnection();
-    private WebSocketClient webSocketClient;
+    private Gson gson;
 
     public WebSocketService() {
     }
@@ -42,8 +37,8 @@ public class WebSocketService extends Service {
     @Override
     public void onCreate() {
         super.onCreate();
-        connectToWebSocket();
-//        startWebsocket();
+        gson = new Gson();
+        start();
     }
 
     @Override
@@ -52,117 +47,66 @@ public class WebSocketService extends Service {
         throw new UnsupportedOperationException("Not yet implemented");
     }
 
-    private void startWebsocket() {
-        WebSocketFactory webSocketFactory = new WebSocketFactory();
-        try {
-            com.neovisionaries.ws.client.WebSocket webSocket = webSocketFactory.createSocket(BuildConfig.WEB_SOCKET_URL+":443", 5000)
-                    .addHeader("token", "12497228-cb3a-4fb7-ae99-be150f70be97");
-            webSocket.connectAsynchronously();
-            webSocket.addListener(new WebSocketAdapter() {
-                @Override
-                public void onConnected(com.neovisionaries.ws.client.WebSocket websocket, Map<String, List<String>> headers) throws Exception {
-                    super.onConnected(websocket, headers);
-                    Log.d(TAG, "onConnected: web socket connected");
-                }
-
-                @Override
-                public void onCloseFrame(com.neovisionaries.ws.client.WebSocket websocket, WebSocketFrame frame) throws Exception {
-                    super.onCloseFrame(websocket, frame);
-                    Log.d(TAG, "onCloseFrame: websocket closed" + frame.getCloseReason() );
-                }
-
-                @Override
-                public void onError(com.neovisionaries.ws.client.WebSocket websocket, com.neovisionaries.ws.client.WebSocketException cause) throws Exception {
-                    super.onError(websocket, cause);
-                    Log.e(TAG, "onError: error", cause);
-                }
-
-                @Override
-                public void onTextMessage(com.neovisionaries.ws.client.WebSocket websocket, String text) throws Exception {
-                    super.onTextMessage(websocket, text);
-                }
-            });
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
-    }
-
-    private void connectToWebSocket() {
-        Map<String, String> header = new HashMap<>();
-        header.put("token", "12497228-cb3a-4fb7-ae99-be150f70be97");
-        URI webSocketURI = null;
-        try {
-            webSocketURI = new URI(BuildConfig.WEB_SOCKET_URL+":443");
-        } catch (URISyntaxException e) {
-            e.printStackTrace();
-        }
-
-        webSocketClient = new WebSocketClient(webSocketURI, new Draft_6455(), header, 10000) {
+    private void start() {
+        List<BasicNameValuePair> headers = new ArrayList<>();
+        headers.add(new BasicNameValuePair("token", BuildConfig.USER_TOKEN));
+        URI websocketUri = URI.create(BuildConfig.WEB_SOCKET_URL);
+        android.rahardyan.simplechatapp.util.WebSocketClient webSocketClient = new android.rahardyan.simplechatapp.util.WebSocketClient(websocketUri, new android.rahardyan.simplechatapp.util.WebSocketClient.Listener() {
             @Override
-            public void onOpen(ServerHandshake handshakedata) {
-                Log.d(TAG, "onOpen: websocket open");
+            public void onConnect() {
+                Log.d(TAG, "onConnect: websocket connected");
             }
 
             @Override
             public void onMessage(String message) {
-                Log.d(TAG, "onMessage: websocket message "+message);
+                WebSocketMessage webSocketMessage = gson.fromJson(message, WebSocketMessage.class);
+                EventBus.getDefault().post(webSocketMessage);
+                String senderName = webSocketMessage.getData().getChanges().getHistories().getNewValue().get(0).getCreatedName();
+                String comment = senderName + ": " + webSocketMessage.getData().getChanges().getHistories().getNewValue().get(0).getMessage();
+                String issueId = webSocketMessage.getData().getChanges().getHistories().getNewValue().get(0).getIssueId();
+                String topicName = webSocketMessage.getData().getSource().get(0).getParentName();
+                Log.d(TAG, "onMessage: message " +comment);
+                showMessageNotification(comment, issueId, topicName);
             }
 
             @Override
-            public void onClose(int code, String reason, boolean remote) {
-                Log.d(TAG, "onClose: webSocketClose "+reason + " code "+code);
+            public void onMessage(byte[] data) {
+
             }
 
             @Override
-            public void onError(Exception ex) {
-                Log.e(TAG, "onError: connect websocket", ex);
+            public void onDisconnect(int code, String reason) {
+                Log.d(TAG, "onDisconnect: websocket disconnected " + reason);
+                start();
             }
-        };
+
+            @Override
+            public void onError(Exception error) {
+
+            }
+        }, headers);
         webSocketClient.connect();
     }
 
-//    private class WebSocketOperation extends AsyncTask<String, Void, String> {
-//        private WebSocketClient webSocketClient;
-//
-//        @Override
-//        protected String doInBackground(String... params) {
-////            start();
-//            return "executed";
-//        }
-//
-//        private void start() {
-//            try {
-//                mConnection.connect("wss://dev.innerbeans.org/common/mobileSocket" + ":443", new WebSocket.ConnectionHandler() {
-//                    @Override
-//                    public void onOpen() {
-//                        Log.d(TAG, "onOpen: websocket open");
-//                    }
-//
-//                    @Override
-//                    public void onClose(int code, String reason) {
-//                        Log.d(TAG, "onClose: webSocketClose "+reason+" code"+code);
-//                    }
-//
-//                    @Override
-//                    public void onTextMessage(String payload) {
-//
-//                    }
-//
-//                    @Override
-//                    public void onRawTextMessage(byte[] payload) {
-//
-//                    }
-//
-//                    @Override
-//                    public void onBinaryMessage(byte[] payload) {
-//
-//                    }
-//                });
-//            } catch (WebSocketException e) {
-//
-//                Log.d(TAG, e.toString());
-//            }
-//        }
-//
-//    }
+    private void showMessageNotification(String message, String issueId, String topicName) {
+        Intent activeIntent = ChatActivity.generateIntent(getApplicationContext(), topicName, issueId);
+        TaskStackBuilder taskStackBuilder = TaskStackBuilder.create(getApplicationContext());
+        taskStackBuilder.addParentStack(TopicListActivity.class);
+        taskStackBuilder.addNextIntentWithParentStack(activeIntent);
+        PendingIntent pendingIntent = taskStackBuilder.getPendingIntent(212, PendingIntent.FLAG_UPDATE_CURRENT);
+
+        NotificationCompat.Builder notificationBuilder = new NotificationCompat.Builder(this);
+        notificationBuilder.setContentTitle(topicName)
+                .setContentText(message)
+                .setTicker(message)
+                .setSmallIcon(R.mipmap.ic_launcher_round)
+                .setLargeIcon(BitmapFactory.decodeResource(getResources(), R.mipmap.ic_launcher))
+                .setContentIntent(pendingIntent)
+                .setGroupSummary(true)
+                .setGroup("CHAT_NOTIF")
+                .setPriority(10)
+                .setAutoCancel(true)
+                .setDefaults(Notification.DEFAULT_ALL);
+        NotificationManagerCompat.from(getBaseContext()).notify(10, notificationBuilder.build());
+    }
 }

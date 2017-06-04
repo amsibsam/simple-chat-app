@@ -1,5 +1,6 @@
 package android.rahardyan.simplechatapp.network;
 
+import android.rahardyan.simplechatapp.BuildConfig;
 import android.text.TextUtils;
 
 import java.io.IOException;
@@ -23,7 +24,7 @@ public class HeaderInterceptor implements Interceptor {
 
         HttpUrl url = originalRequest.url();
         Request.Builder newRequestBuilder = originalRequest.newBuilder();
-        newRequestBuilder.removeHeader(TOKEN).addHeader(TOKEN, "12497228-cb3a-4fb7-ae99-be150f70be97");
+        newRequestBuilder.removeHeader(TOKEN).addHeader(TOKEN, BuildConfig.USER_TOKEN);
         newRequestBuilder.url(url);
 
         return chain.proceed(newRequestBuilder.build());

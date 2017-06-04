@@ -9,12 +9,14 @@ import android.rahardyan.simplechatapp.model.Comment;
 import android.os.Bundle;
 import android.rahardyan.simplechatapp.R;
 import android.rahardyan.simplechatapp.model.CommentRequestBody;
+import android.rahardyan.simplechatapp.model.WebSocketMessage;
 import android.rahardyan.simplechatapp.ui.chat.adapter.ChatAdapter;
 import android.rahardyan.simplechatapp.ui.chat.presenter.ChatContract;
 import android.rahardyan.simplechatapp.ui.chat.presenter.ChatPresenter;
 import android.rahardyan.simplechatapp.util.Constants;
 import android.rahardyan.simplechatapp.util.EndlessRecyclerViewScrollListener;
 import android.rahardyan.simplechatapp.util.FileUtil;
+import android.support.v4.content.FileProvider;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
 import android.util.Log;
@@ -24,9 +26,15 @@ import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.TextView;
 
+import org.greenrobot.eventbus.EventBus;
+import org.greenrobot.eventbus.Subscribe;
+
 import java.io.File;
 import java.io.IOException;
 import java.util.UUID;
+
+import static android.content.Intent.FLAG_GRANT_READ_URI_PERMISSION;
+import static android.content.Intent.FLAG_GRANT_WRITE_URI_PERMISSION;
 
 public class ChatActivity extends BaseActivity implements ChatContract.View{
     private static final int PICK_FILE_REQUEST = 1;
@@ -54,6 +62,7 @@ public class ChatActivity extends BaseActivity implements ChatContract.View{
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+        EventBus.getDefault().register(this);
         getIntentData();
         chatPresenter = new ChatPresenter(this, this);
         chatPresenter.loadComment(issueId);
@@ -132,8 +141,10 @@ public class ChatActivity extends BaseActivity implements ChatContract.View{
         String mime = FileUtil.getMimeTypeOfFile(file.getPath());
         Intent intent = new Intent();
         intent.setAction(android.content.Intent.ACTION_VIEW);
-        intent.setDataAndType(Uri.fromFile(file), mime);
-        startActivityForResult(intent, 10);
+        intent.setFlags(FLAG_GRANT_READ_URI_PERMISSION | FLAG_GRANT_WRITE_URI_PERMISSION);
+        Uri fileUri = FileProvider.getUriForFile(this, this.getApplicationContext().getPackageName() + ".provider", file);;
+        intent.setDataAndType(fileUri, mime);
+        startActivity(intent);
     }
 
     private void showUploadLoading() {
@@ -255,4 +266,10 @@ public class ChatActivity extends BaseActivity implements ChatContract.View{
     public void loadingMoreComment() {
         moreCommentLoading.setVisibility(View.VISIBLE);
     }
+
+    @Subscribe
+    public void onWebSocketMessage(WebSocketMessage webSocketMessage) {
+        chatPresenter.loadComment(issueId);
+    }
+
 }
