@@ -6,4 +6,6 @@
     <string name="failed_loading_data">Failed load data</string>
     <string name="failed_upload">failed to upload file</string>
     <string name="failed_download">failed download file</string>
+    <string name="uploading">uploading..</string>
+    <string name="downloading">downloading</string>
 </resources>

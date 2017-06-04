@@ -24,7 +24,7 @@ import android.widget.Toast;
 
 public abstract class BaseActivity extends AppCompatActivity {
     private static final String TAG = BaseActivity.class.getSimpleName();
-    private static final int PERMISION_REQUEST_CODE = 101;
+    private static final int PERMISSION_REQUEST_CODE = 101;
     private Toolbar toolbar;
     private ProgressDialog progressDialog;
     private AlertDialog alertDialog;
@@ -45,7 +45,7 @@ public abstract class BaseActivity extends AppCompatActivity {
     @Override
     public void onRequestPermissionsResult(int requestCode, @NonNull String[] permissions, @NonNull int[] grantResults) {
         switch (requestCode) {
-            case PERMISION_REQUEST_CODE: {
+            case PERMISSION_REQUEST_CODE: {
                 // If request is cancelled, the result arrays are empty.
                 if (grantResults.length > 0
                         && grantResults[0] == PackageManager.PERMISSION_GRANTED
@@ -173,7 +173,7 @@ public abstract class BaseActivity extends AppCompatActivity {
 
     /**
      * show Toast
-     * @param message - string toast messagegit
+     * @param message - string toast message
      */
     public void showToast(String message) {
         if (getApplicationContext() != null) {
@@ -192,7 +192,7 @@ public abstract class BaseActivity extends AppCompatActivity {
             isPermissionDenied = true;
             ActivityCompat.requestPermissions(this,
                     requestedPermission,
-                    PERMISION_REQUEST_CODE);
+                    PERMISSION_REQUEST_CODE);
         } else if (ContextCompat.checkSelfPermission(this,
                 Manifest.permission.CAMERA)
                 == PackageManager.PERMISSION_GRANTED) {

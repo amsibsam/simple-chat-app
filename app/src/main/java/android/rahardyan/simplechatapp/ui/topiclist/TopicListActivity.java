@@ -49,8 +49,8 @@ public class TopicListActivity extends BaseActivity implements TopicContract.Vie
 
         topicAdapter.setOnItemClickListener(new TopicAdapter.OnItemClickListener() {
             @Override
-            public void onClick(String issueId) {
-                startActivity(ChatActivity.generateIntent(TopicListActivity.this, issueId));
+            public void onClick(String topicName, String issueId) {
+                startActivity(ChatActivity.generateIntent(TopicListActivity.this, topicName, issueId));
             }
         });
     }

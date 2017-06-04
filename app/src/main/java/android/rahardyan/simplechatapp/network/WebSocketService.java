@@ -12,6 +12,7 @@ import com.neovisionaries.ws.client.WebSocketAdapter;
 import com.neovisionaries.ws.client.WebSocketFactory;
 import com.neovisionaries.ws.client.WebSocketFrame;
 
+import org.apache.http.message.BasicNameValuePair;
 import org.java_websocket.client.WebSocketClient;
 import org.java_websocket.drafts.Draft_10;
 import org.java_websocket.drafts.Draft_17;
@@ -24,13 +25,11 @@ import java.io.IOException;
 import java.net.URI;
 import java.net.URISyntaxException;
 
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-import io.crossbar.autobahn.WebSocket;
-import io.crossbar.autobahn.WebSocketConnection;
-import io.crossbar.autobahn.WebSocketException;
 
 public class WebSocketService extends Service {
     private static final String TAG = WebSocketService.class.getSimpleName();
@@ -98,7 +97,7 @@ public class WebSocketService extends Service {
             e.printStackTrace();
         }
 
-        webSocketClient = new WebSocketClient(webSocketURI, new Draft_6455(), header, 5000) {
+        webSocketClient = new WebSocketClient(webSocketURI, new Draft_6455(), header, 10000) {
             @Override
             public void onOpen(ServerHandshake handshakedata) {
                 Log.d(TAG, "onOpen: websocket open");

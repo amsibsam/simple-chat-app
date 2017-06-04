@@ -19,7 +19,25 @@
             android:layout_width="match_parent"
             android:layout_height="match_parent"
             android:layout_above="@+id/panel_container" />
-
+        <LinearLayout
+            android:visibility="gone"
+            android:id="@+id/loading_upload"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_above="@+id/panel_container"
+            android:orientation="horizontal"
+            android:padding="@dimen/activity_vertical_padding"
+            android:background="@android:color/white"
+            android:gravity="center">
+            <TextView
+                android:id="@+id/tv_loading"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="@string/uploading"/>
+            <ProgressBar
+                android:layout_width="20dp"
+                android:layout_height="20dp" />
+        </LinearLayout>
         <LinearLayout
             android:id="@+id/panel_container"
             android:layout_width="match_parent"

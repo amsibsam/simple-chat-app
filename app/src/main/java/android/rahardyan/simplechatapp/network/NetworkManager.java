@@ -50,19 +50,13 @@ public class NetworkManager {
         return networkService.postComment(issueId, commentRequestBody);
     }
 
-    public Call<JsonElement> uploadFile(String issueId, File file){
-        Map<String, RequestBody> partMap = new HashMap<>();
-        partMap.put(String.format("raw_file\"; filename=\"%s\"", file.getName()),
-                RequestBody.create(MediaType.parse(URLConnection.guessContentTypeFromName(file.getName())), file));
-
-        RequestBody fileRequestBody = RequestBody.create(MediaType.parse("image/*"), file);
+    public Call<Void> uploadFile(String issueId, File file, Uri fileUri){
+        RequestBody fileRequestBody = RequestBody.create(MediaType.parse(context.getContentResolver().getType(fileUri)), file);
 
         MultipartBody.Part body =
-                MultipartBody.Part.createFormData("upload", file.getName(), fileRequestBody);
+                MultipartBody.Part.createFormData("file", file.getName(), fileRequestBody);
 
-        RequestBody requestBodyDesc = RequestBody.create(
-                MediaType.parse("text/plain"), "test upload");
-        return networkService.uploadFile(issueId, UUID.randomUUID().toString(), requestBodyDesc, body);
+        return networkService.uploadFile(issueId, UUID.randomUUID().toString(), body);
     }
 
     public Call<ResponseBody> downloadFile(String issueId, String attachmentId) {

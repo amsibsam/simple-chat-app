@@ -1,6 +1,7 @@
 package android.rahardyan.simplechatapp.ui.chat.presenter;
 
 import android.content.Context;
+import android.net.Uri;
 import android.rahardyan.simplechatapp.R;
 import android.rahardyan.simplechatapp.base.BasePresenter;
 import android.rahardyan.simplechatapp.model.Comment;
@@ -27,7 +28,7 @@ public class ChatPresenter extends BasePresenter implements ChatContract.UserAct
     @NonNull
     private ChatContract.View mChatView;
 
-    public ChatPresenter(Context context, ChatContract.View mChatView) {
+    public ChatPresenter(@NonNull Context context, @NonNull ChatContract.View mChatView) {
         super(context);
         this.mChatView = mChatView;
     }
@@ -39,6 +40,7 @@ public class ChatPresenter extends BasePresenter implements ChatContract.UserAct
         tempComment.setMessage(commentRequestBody.getComment());
         tempComment.setWrittenTime("0");
         tempComment.setCreatedName("Joy");
+        tempComment.setField("");
         mChatView.onSendComment(tempComment);
 
         networkManager.postComment(issueId, commentRequestBody).enqueue(new Callback<JsonElement>() {
@@ -59,10 +61,12 @@ public class ChatPresenter extends BasePresenter implements ChatContract.UserAct
     }
 
     @Override
-    public void uploadFile(String issueId, File file) {
-        networkManager.uploadFile(issueId, file).enqueue(new Callback<JsonElement>() {
+    public void uploadFile(String issueId, File file, Uri fileUri) {
+        mChatView.onUploading();
+        networkManager.uploadFile(issueId, file, fileUri).enqueue(new Callback<Void>() {
             @Override
-            public void onResponse(Call<JsonElement> call, Response<JsonElement> response) {
+            public void onResponse(Call<Void> call, Response<Void> response) {
+                mChatView.onDismissLoading();
                 if (response.isSuccessful()) {
                     mChatView.onSuccessUploadFile();
                 } else {
@@ -71,7 +75,8 @@ public class ChatPresenter extends BasePresenter implements ChatContract.UserAct
             }
 
             @Override
-            public void onFailure(Call<JsonElement> call, Throwable t) {
+            public void onFailure(Call<Void> call, Throwable t) {
+                mChatView.onDismissLoading();
                 mChatView.onFailedUploadFile();
             }
         });
@@ -125,7 +130,7 @@ public class ChatPresenter extends BasePresenter implements ChatContract.UserAct
 
     @Override
     public void downloadFile(String issueId, final String fileId) {
-        mChatView.onShowLoading();
+        mChatView.onDownloading();
         networkManager.downloadFile(issueId, fileId)
                 .enqueue(new Callback<ResponseBody>() {
                     @Override
@@ -139,14 +144,14 @@ public class ChatPresenter extends BasePresenter implements ChatContract.UserAct
                                 e.printStackTrace();
                             }
                         } else {
-                            mChatView.onFaileDownloadFile(context.getString(R.string.failed_download));
+                            mChatView.onFailedDownloadFile(context.getString(R.string.failed_download));
                         }
                     }
 
                     @Override
                     public void onFailure(Call<ResponseBody> call, Throwable t) {
                         mChatView.onDismissLoading();
-                        mChatView.onFaileDownloadFile(context.getString(R.string.failed_download));
+                        mChatView.onFailedDownloadFile(context.getString(R.string.failed_download));
                     }
                 });
     }

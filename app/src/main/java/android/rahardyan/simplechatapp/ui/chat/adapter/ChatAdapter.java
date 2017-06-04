@@ -9,7 +9,6 @@ import android.support.v7.widget.RecyclerView;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
-import android.widget.Button;
 import android.widget.ImageView;
 import android.widget.TextView;
 
@@ -96,8 +95,8 @@ public class ChatAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder>{
                 anotherCommentViewHolder.tvCommentsWrittenTime.setText(chatCreatedTime);
                 anotherCommentViewHolder.tvSender.setText(sender);
                 Picasso.with(context).load(senderAvatar).into(anotherCommentViewHolder.ivAvatar);
-                anotherCommentViewHolder.btnDonwload.setVisibility(isAttachment ? View.VISIBLE : View.GONE);
-                anotherCommentViewHolder.btnDonwload.setOnClickListener(new View.OnClickListener() {
+                anotherCommentViewHolder.btnDownload.setVisibility(isAttachment ? View.VISIBLE : View.GONE);
+                anotherCommentViewHolder.btnDownload.setOnClickListener(new View.OnClickListener() {
                     @Override
                     public void onClick(View v) {
                         if (onAttachmentDownloadClickListener != null)
@@ -141,7 +140,7 @@ public class ChatAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder>{
     public class AnotherCommentViewHolder extends RecyclerView.ViewHolder {
         TextView tvComments, tvCommentsWrittenTime, tvSender;
         RoundedImageView ivAvatar;
-        ImageView btnDonwload;
+        ImageView btnDownload;
 
         public AnotherCommentViewHolder(View itemView) {
             super(itemView);
@@ -149,7 +148,7 @@ public class ChatAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder>{
             tvCommentsWrittenTime = (TextView) itemView.findViewById(R.id.tv_time);
             tvSender = (TextView) itemView.findViewById(R.id.tv_sender_name);
             ivAvatar = (RoundedImageView) itemView.findViewById(R.id.iv_sender_avatar);
-            btnDonwload = (ImageView) itemView.findViewById(R.id.btn_download);
+            btnDownload = (ImageView) itemView.findViewById(R.id.btn_download);
         }
     }
 

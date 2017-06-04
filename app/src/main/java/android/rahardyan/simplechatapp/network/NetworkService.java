@@ -49,7 +49,13 @@ public interface NetworkService {
 
     @Multipart
     @POST("/api/issues/{issueId}/upload")
-    Call<JsonElement> uploadFile(@Path("issueId") String issueId,
+    Call<Void> uploadFile(@Path("issueId") String issueId,
+                                 @Query("uuid") String uuid,
+                                 @Part MultipartBody.Part file);
+
+
+    @POST("/api/issues/{issueId}/upload")
+    Call<JsonElement> uploadFile2(@Path("issueId") String issueId,
                                  @Query("uuid") String uuid,
                                  @Part("description") RequestBody requestBody,
                                  @Part MultipartBody.Part file);

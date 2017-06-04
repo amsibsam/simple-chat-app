@@ -1,5 +1,6 @@
 package android.rahardyan.simplechatapp.ui.chat.presenter;
 
+import android.net.Uri;
 import android.rahardyan.simplechatapp.model.Comment;
 import android.rahardyan.simplechatapp.model.CommentRequestBody;
 
@@ -35,13 +36,17 @@ public interface ChatContract {
 
         void onSuccessDownloadFile(File file);
 
-        void onFaileDownloadFile(String message);
+        void onFailedDownloadFile(String message);
+
+        void onUploading();
+
+        void onDownloading();
     }
 
     interface UserActionListener {
         void sendComment(String issueId, CommentRequestBody comment);
 
-        void uploadFile(String issueId, File file);
+        void uploadFile(String issueId, File file, Uri fileUri);
 
         void loadComment(String issueId);
 

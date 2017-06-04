@@ -22,6 +22,8 @@ import android.view.View;
 import android.widget.Button;
 import android.widget.EditText;
 import android.widget.ImageView;
+import android.widget.LinearLayout;
+import android.widget.TextView;
 
 import java.io.File;
 import java.io.IOException;
@@ -31,17 +33,21 @@ public class ChatActivity extends BaseActivity implements ChatContract.View{
     private static final int PICK_FILE_REQUEST = 1;
     private static final String TAG = ChatActivity.class.getSimpleName();
     private String issueId;
+    private String topicName;
     private ChatPresenter chatPresenter;
     private ChatAdapter chatAdapter;
     private RecyclerView recyclerViewComment;
+    private LinearLayout loadingUpload;
+    private TextView tvLoading;
     private ImageView btnSendComment, btnAttach;
     private EditText etComment;
     private String[] permissions = {Manifest.permission.READ_EXTERNAL_STORAGE,
             Manifest.permission.WRITE_EXTERNAL_STORAGE};
 
-    public static Intent generateIntent(Context context, String issueId) {
+    public static Intent generateIntent(Context context, String topicName, String issueId) {
         Intent intent = new Intent(context, ChatActivity.class);
         intent.putExtra(Constants.ISSUE_ID_KEY, issueId);
+        intent.putExtra(Constants.TOPIC_NAME_KEY, topicName);
 
         return intent;
     }
@@ -55,11 +61,12 @@ public class ChatActivity extends BaseActivity implements ChatContract.View{
         requestPermission(permissions);
         initView();
         initRecyclerView();
-        setUpToolbar(true, "New Arrival");
+        setUpToolbar(true, topicName);
     }
 
     private void getIntentData() {
         issueId = getIntent().getStringExtra(Constants.ISSUE_ID_KEY);
+        topicName = getIntent().getStringExtra(Constants.TOPIC_NAME_KEY);
     }
 
     private void initView() {
@@ -67,6 +74,8 @@ public class ChatActivity extends BaseActivity implements ChatContract.View{
         btnSendComment = (ImageView) findViewById(R.id.btn_send);
         btnAttach = (ImageView) findViewById(R.id.btn_attach);
         etComment = (EditText) findViewById(R.id.et_comment);
+        loadingUpload = (LinearLayout) findViewById(R.id.loading_upload);
+        tvLoading = (TextView) findViewById(R.id.tv_loading);
 
         btnAttach.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -117,7 +126,24 @@ public class ChatActivity extends BaseActivity implements ChatContract.View{
                 chatPresenter.downloadFile(issueId, attachFileId);
             }
         });
+    }
 
+    private void openDownloadedFile(File file) {
+        String mime = FileUtil.getMimeTypeOfFile(file.getPath());
+        Intent intent = new Intent();
+        intent.setAction(android.content.Intent.ACTION_VIEW);
+        intent.setDataAndType(Uri.fromFile(file), mime);
+        startActivityForResult(intent, 10);
+    }
+
+    private void showUploadLoading() {
+        tvLoading.setText(getResources().getString(R.string.uploading));
+        loadingUpload.setVisibility(View.VISIBLE);
+    }
+
+    private void showDownloadLoading() {
+        tvLoading.setText(getResources().getString(R.string.downloading));
+        loadingUpload.setVisibility(View.VISIBLE);
     }
 
     @Override
@@ -130,7 +156,7 @@ public class ChatActivity extends BaseActivity implements ChatContract.View{
             }
             try {
                 File file = FileUtil.from(this, data.getData());
-                chatPresenter.uploadFile(issueId, file);
+                chatPresenter.uploadFile(issueId, file, data.getData());
             } catch (IOException e) {
                 showToast("Failed to read file data!");
                 e.printStackTrace();
@@ -154,6 +180,7 @@ public class ChatActivity extends BaseActivity implements ChatContract.View{
     @Override
     public void onDismissLoading() {
         dismissProgressDialog();
+        loadingUpload.setVisibility(View.GONE);
     }
 
     @Override
@@ -200,12 +227,7 @@ public class ChatActivity extends BaseActivity implements ChatContract.View{
 
     @Override
     public void onSuccessDownloadFile(File file) {
-        String mime = FileUtil.getMimeTypeOfFile(file.getPath());
-
-        Intent intent = new Intent();
-        intent.setAction(android.content.Intent.ACTION_VIEW);
-        intent.setDataAndType(Uri.fromFile(file), mime);
-        startActivityForResult(intent, 10);
+        openDownloadedFile(file);
     }
 
     @Override
@@ -214,7 +236,17 @@ public class ChatActivity extends BaseActivity implements ChatContract.View{
     }
 
     @Override
-    public void onFaileDownloadFile(String message) {
+    public void onFailedDownloadFile(String message) {
         showToast(message);
+    }
+
+    @Override
+    public void onUploading() {
+        showUploadLoading();
+    }
+
+    @Override
+    public void onDownloading() {
+        showDownloadLoading();
     }
 }

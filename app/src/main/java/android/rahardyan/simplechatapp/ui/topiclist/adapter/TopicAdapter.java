@@ -47,7 +47,7 @@ public class TopicAdapter extends RecyclerView.Adapter<TopicAdapter.TopicViewHol
 
     @Override
     public void onBindViewHolder(TopicViewHolder holder, int position) {
-        String topicName = issueListList.get(position).getTitle();
+        final String topicName = issueListList.get(position).getTitle();
         final String issueId = issueListList.get(position).getId();
         holder.tvTopicName.setText(topicName);
 
@@ -55,7 +55,7 @@ public class TopicAdapter extends RecyclerView.Adapter<TopicAdapter.TopicViewHol
             @Override
             public void onClick(View v) {
                 if (mOnItemClickListener != null)
-                    mOnItemClickListener.onClick(issueId);
+                    mOnItemClickListener.onClick(topicName, issueId);
             }
         });
     }
@@ -77,6 +77,6 @@ public class TopicAdapter extends RecyclerView.Adapter<TopicAdapter.TopicViewHol
     }
 
     public interface OnItemClickListener {
-        void onClick(String issueId);
+        void onClick(String topicName, String issueId);
     }
 }

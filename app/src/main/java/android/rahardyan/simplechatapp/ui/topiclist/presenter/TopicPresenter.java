@@ -18,7 +18,7 @@ public class TopicPresenter extends BasePresenter implements TopicContract.UserA
     @NonNull
     private TopicContract.View mTopicView;
 
-    public TopicPresenter(Context context, TopicContract.View mTopicView) {
+    public TopicPresenter(@NonNull Context context, @NonNull TopicContract.View mTopicView) {
         super(context);
         this.mTopicView = mTopicView;
     }
