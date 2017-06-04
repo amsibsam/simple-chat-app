@@ -109,6 +109,7 @@ public class ChatPresenter extends BasePresenter implements ChatContract.UserAct
 
     @Override
     public void loadMoreComment(String issueId, int page) {
+        mChatView.loadingMoreComment();
         networkManager.getComments(issueId, page).enqueue(new Callback<Comment>() {
             @Override
             public void onResponse(Call<Comment> call, Response<Comment> response) {

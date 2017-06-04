@@ -41,6 +41,8 @@ public interface ChatContract {
         void onUploading();
 
         void onDownloading();
+
+        void loadingMoreComment();
     }
 
     interface UserActionListener {

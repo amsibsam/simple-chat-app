@@ -19,7 +19,6 @@ import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
 import android.util.Log;
 import android.view.View;
-import android.widget.Button;
 import android.widget.EditText;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
@@ -37,7 +36,7 @@ public class ChatActivity extends BaseActivity implements ChatContract.View{
     private ChatPresenter chatPresenter;
     private ChatAdapter chatAdapter;
     private RecyclerView recyclerViewComment;
-    private LinearLayout loadingUpload;
+    private LinearLayout uploadLoading, moreCommentLoading;
     private TextView tvLoading;
     private ImageView btnSendComment, btnAttach;
     private EditText etComment;
@@ -74,7 +73,8 @@ public class ChatActivity extends BaseActivity implements ChatContract.View{
         btnSendComment = (ImageView) findViewById(R.id.btn_send);
         btnAttach = (ImageView) findViewById(R.id.btn_attach);
         etComment = (EditText) findViewById(R.id.et_comment);
-        loadingUpload = (LinearLayout) findViewById(R.id.loading_upload);
+        uploadLoading = (LinearLayout) findViewById(R.id.loading_upload);
+        moreCommentLoading = (LinearLayout) findViewById(R.id.loadmore_loading);
         tvLoading = (TextView) findViewById(R.id.tv_loading);
 
         btnAttach.setOnClickListener(new View.OnClickListener() {
@@ -138,12 +138,12 @@ public class ChatActivity extends BaseActivity implements ChatContract.View{
 
     private void showUploadLoading() {
         tvLoading.setText(getResources().getString(R.string.uploading));
-        loadingUpload.setVisibility(View.VISIBLE);
+        uploadLoading.setVisibility(View.VISIBLE);
     }
 
     private void showDownloadLoading() {
         tvLoading.setText(getResources().getString(R.string.downloading));
-        loadingUpload.setVisibility(View.VISIBLE);
+        uploadLoading.setVisibility(View.VISIBLE);
     }
 
     @Override
@@ -180,7 +180,7 @@ public class ChatActivity extends BaseActivity implements ChatContract.View{
     @Override
     public void onDismissLoading() {
         dismissProgressDialog();
-        loadingUpload.setVisibility(View.GONE);
+        uploadLoading.setVisibility(View.GONE);
     }
 
     @Override
@@ -217,6 +217,7 @@ public class ChatActivity extends BaseActivity implements ChatContract.View{
 
     @Override
     public void onLoadMoreComment(Comment comment) {
+        moreCommentLoading.setVisibility(View.GONE);
         chatAdapter.loadMoreComment(comment.getData());
     }
 
@@ -248,5 +249,10 @@ public class ChatActivity extends BaseActivity implements ChatContract.View{
     @Override
     public void onDownloading() {
         showDownloadLoading();
+    }
+
+    @Override
+    public void loadingMoreComment() {
+        moreCommentLoading.setVisibility(View.VISIBLE);
     }
 }
