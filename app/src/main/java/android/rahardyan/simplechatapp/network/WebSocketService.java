@@ -66,7 +66,7 @@ public class WebSocketService extends Service {
                 String issueId = webSocketMessage.getData().getChanges().getHistories().getNewValue().get(0).getIssueId();
                 String topicName = webSocketMessage.getData().getSource().get(0).getParentName();
                 Log.d(TAG, "onMessage: message " +comment);
-                if (!senderName.toLowerCase().equals("joy")) {
+                if (!senderName.toLowerCase().equals(getString(R.string.user_name))) {
                     showMessageNotification(comment, issueId, topicName);
                 }
             }

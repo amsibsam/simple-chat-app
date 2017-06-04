@@ -43,7 +43,7 @@ public class ChatPresenter extends BasePresenter implements ChatContract.UserAct
         final CommentDetail tempComment = new CommentDetail();
         tempComment.setMessage(commentRequestBody.getComment());
         tempComment.setWrittenTime("0");
-        tempComment.setCreatedName("Joy");
+        tempComment.setCreatedName(context.getResources().getString(R.string.user_name));
         tempComment.setField("");
         mChatView.onSendComment(tempComment);
 

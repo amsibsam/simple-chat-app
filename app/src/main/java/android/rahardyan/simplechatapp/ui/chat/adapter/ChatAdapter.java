@@ -77,7 +77,7 @@ public class ChatAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder>{
     public int getItemViewType(int position) {
         String sender = comments.get(position).getCreatedName();
 
-        return sender.toLowerCase().equals("joy") ? MY_COMMENT : ANOTHER_COMMENT;
+        return sender.toLowerCase().equals(context.getResources().getString(R.string.user_name)) ? MY_COMMENT : ANOTHER_COMMENT;
     }
 
     @Override

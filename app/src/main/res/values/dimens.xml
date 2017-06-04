@@ -22,7 +22,6 @@
     <dimen name="profile_image_border_width">2dp</dimen>
     <dimen name="profile_image_margin">30dp</dimen>
     <dimen name="divider_layout_height">1dp</dimen>
-    <dimen name="appointment_status_height">40dp</dimen>
     <dimen name="spinner_doctor_height">45dp</dimen>
 
     <dimen name="margin_small">5dp</dimen>
@@ -36,9 +35,6 @@
 
     <dimen name="card_margin_horizontal">12dp</dimen>
     <dimen name="card_margin_vertical">8dp</dimen>
-    <dimen name="patient_name_size">18sp</dimen>
-    <dimen name="appointment_date_size">12sp</dimen>
-    <dimen name="cancel_appointment_label_size">11sp</dimen>
 
     <dimen name="small_radius">3dp</dimen>
 
